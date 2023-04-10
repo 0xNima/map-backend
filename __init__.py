@@ -27,12 +27,14 @@ def create_app():
     app.config['SESSION_PERMANENT'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
     app.config['CORS_HEADERS'] = 'Content-Type'
+    app.config['SESSION_COOKIE_SAMESITE'] = "None"
+    app.config['SESSION_COOKIE_SECURE'] = "Secure"
 
     db.init_app(app)
     ma.init_app(app)
     lm.init_app(app)
    
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     with app.app_context():
         from .models import Users, Indicators, Countries

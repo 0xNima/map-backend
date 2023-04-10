@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session, make_response
 from flask_login import login_user, login_required, current_user, logout_user
 
 from webservice import db
@@ -12,13 +12,14 @@ from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
+
 @auth.route('/api/login/', methods=['POST'])
 def login():
     if current_user.is_authenticated:
         return jsonify({'detail': 'You are already logged in'}), 200
 
     data = user_schema.loads(request.data)
-    user = db.session.query(Users).filter(Users.email == data['email']).first()
+    user = db.session.query(Users).filter(Users.email == data['email'].lower()).first()
 
     code = 403
 
@@ -27,8 +28,9 @@ def login():
             user.last_login = datetime.now()
             db.session.commit()
 
-            login_user(user)
-            return {'detail': 'Logged In'}, 200
+            logged_in = login_user(user)
+            if logged_in:
+                return {'detail': 'Logged In'}, 200
         code = 401
     return jsonify({'detail': 'Invalid Credential'}), code
 
@@ -41,3 +43,9 @@ def logout():
     if res:
         return jsonify({'detail': 'Logged out'}), 200
     return jsonify({'detail': 'A problem has occurred'}), 400
+
+
+@auth.route('/api/check/')
+@login_required
+def check():
+    return jsonify({}), 200
