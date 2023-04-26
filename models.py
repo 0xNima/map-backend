@@ -5,12 +5,13 @@ from webservice import db
 from datetime import datetime
 
 
-user_projects = db.Table(
-    'user_projects',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-    db.Column('project_id', db.Integer, db.ForeignKey('projects.id'), primary_key=True),
-    db.Column('is_owner', db.Boolean)
-)
+class UsersProjects(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), primary_key=True)
+    is_owner = db.Column(db.Boolean)
+
+    project = db.relationship('Projects')
+    user = db.relationship('Users')
 
 
 class Users(UserMixin, db.Model):
@@ -21,13 +22,7 @@ class Users(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     logged_out = db.Column(db.Boolean)
     last_login = db.Column(db.DateTime)
-
-    projects = db.relationship(
-        'Projects',
-        secondary=user_projects,
-        lazy='subquery',
-        backref=db.backref('users', lazy=True)
-    )
+    user_projects = db.relationship('UsersProjects')
 
     def __init__(self, email, password, name):
         self.email = email
@@ -41,6 +36,8 @@ class Projects(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now)
     thumbnail = db.Column(URLType)
+    geo_data_file = db.Column(URLType)
+    user_projects = db.relationship('UsersProjects')
 
 
 class Indicators(db.Model):

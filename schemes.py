@@ -21,7 +21,18 @@ class IndicatorsSchema(ma.Schema):
         fields = ('id', 'type', 'name')
 
 
+class ProjectsSchema(ma.Schema):
+    class Meta:
+        fields = ('name', 'description', 'thumbnail', 'geo_data_file')
+
+
+class ProjectsReadSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name', 'description', 'created_at', 'thumbnail')
+
+
 countries_schema = CountriesSchema(many=True)
 indicators_schema = IndicatorsSchema(many=True)
 user_schema = UsersSchema()
 user_read_schema = UsersReadSchema()
+projects_schema = ProjectsSchema()

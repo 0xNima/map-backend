@@ -1,9 +1,12 @@
-from flask import Blueprint, request, jsonify, session, make_response
+import os
+
+from flask import Blueprint, request, jsonify, current_app, url_for, send_from_directory
 from flask_login import login_user, login_required, current_user, logout_user
+from werkzeug.utils import secure_filename
 
 from webservice import db
-from webservice.schemes import user_schema
-from webservice.models import Users
+from webservice.schemes import user_schema, projects_schema
+from webservice.models import Users, Projects, UsersProjects
 
 from werkzeug.security import check_password_hash
 
@@ -49,3 +52,42 @@ def logout():
 @login_required
 def check():
     return jsonify({}), 200
+
+
+@auth.route('/uploads/<name>')
+@login_required
+def download_file(name):
+    return send_from_directory(current_app.config["UPLOAD_FOLDER"], name)
+
+
+@auth.route('/project', methods=['POST'])
+@login_required
+def new_project():
+    data = {}
+
+    for k, v in request.form.items():
+        if k.startswith('user'):
+            data.setdefault('users', []).append(v)
+        else:
+            data[k] = v
+
+    for field, file_obj in request.files.items():
+        filename = secure_filename(file_obj.filename)
+        file_obj.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+        data[field] = url_for('auth.download_file', name=filename)
+
+    users = data.pop('users', [])
+    data = projects_schema.loads(
+        projects_schema.dumps(data)
+    )
+
+    project = Projects(**data)
+    project.user_projects.append(UsersProjects(user_id=1, is_owner=True))
+
+    for user_id in users:
+        project.user_projects.append(UsersProjects(user_id=user_id, is_owner=False))
+
+    db.session.add(project)
+    db.session.commit()
+
+    return {}, 200

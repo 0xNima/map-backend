@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from werkzeug.security import generate_password_hash
 
-from .local import SECRET_KEY, SQLALCHEMY_URI
+from .local import SECRET_KEY, SQLALCHEMY_URI, UPLOAD_FOLDER
 
 from datetime import timedelta
 
@@ -29,6 +29,7 @@ def create_app():
     app.config['CORS_HEADERS'] = 'Content-Type'
     app.config['SESSION_COOKIE_SAMESITE'] = "None"
     app.config['SESSION_COOKIE_SECURE'] = "Secure"
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     db.init_app(app)
     ma.init_app(app)
@@ -37,7 +38,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     with app.app_context():
-        from .models import Users, Indicators, Countries
+        from .models import Users, Indicators, Countries, Projects, UsersProjects
         db.create_all()
 
         @lm.user_loader
