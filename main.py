@@ -27,14 +27,20 @@ def fetch_countries():
 @main.route('/api/geo-data/', methods=['POST'])
 def fetch_geodata():
     try:
-        country = request.json['country']
-        country_geodata_files = map(
-            lambda file_name: url_for('static', filename=f'{country}/{file_name}'),
-            filter(
+        country = request.json.get('country')
+        if country:
+            data = {}
+            files = filter(
                 lambda file: os.path.splitext(file)[-1] == '.geojson',
                 os.listdir(os.path.join(STATIC_DIR, country))
             )
-        )
-        return jsonify(list(country_geodata_files)), 200
+
+            for file in files:
+                data.update({
+                    os.path.splitext(file)[0]: url_for('static', filename=f'{country}/{file}')
+                })
+
+            return jsonify(data), 200
+        return jsonify({'detail': 'Bad Data'}), 400
     except FileNotFoundError:
         return jsonify({'detail': 'Country not found'}), 404

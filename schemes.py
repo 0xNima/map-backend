@@ -23,12 +23,17 @@ class IndicatorsSchema(ma.Schema):
 
 class ProjectsSchema(ma.Schema):
     class Meta:
-        fields = ('name', 'description', 'thumbnail', 'geo_data_file')
+        fields = ('name', 'description', 'thumbnail', 'geo_data_file', 'country_id')
 
 
 class ProjectsReadSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'name', 'description', 'created_at', 'thumbnail')
+        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'geo_data_file', 'country_id')
+
+
+class ProjectReadSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'geo_data_file', 'country_id')
 
 
 countries_schema = CountriesSchema(many=True)
@@ -36,3 +41,5 @@ indicators_schema = IndicatorsSchema(many=True)
 user_schema = UsersSchema()
 user_read_schema = UsersReadSchema()
 projects_schema = ProjectsSchema()
+projects_read_schema = ProjectsReadSchema(many=True)
+project_read_schema = ProjectReadSchema()

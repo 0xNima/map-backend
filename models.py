@@ -10,9 +10,6 @@ class UsersProjects(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), primary_key=True)
     is_owner = db.Column(db.Boolean)
 
-    project = db.relationship('Projects')
-    user = db.relationship('Users')
-
 
 class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,7 +19,7 @@ class Users(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     logged_out = db.Column(db.Boolean)
     last_login = db.Column(db.DateTime)
-    user_projects = db.relationship('UsersProjects')
+    users_projects = db.relationship('UsersProjects', backref="user", cascade='all,delete')
 
     def __init__(self, email, password, name):
         self.email = email
@@ -37,7 +34,8 @@ class Projects(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     thumbnail = db.Column(URLType)
     geo_data_file = db.Column(URLType)
-    user_projects = db.relationship('UsersProjects')
+    users_projects = db.relationship('UsersProjects', backref="project", cascade='all,delete')
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'))
 
 
 class Indicators(db.Model):

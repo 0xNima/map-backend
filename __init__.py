@@ -25,9 +25,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_PERMANENT'] = True
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
     app.config['CORS_HEADERS'] = 'Content-Type'
-    app.config['SESSION_COOKIE_SAMESITE'] = "None"
+    app.config['SESSION_COOKIE_SAMESITE'] = "None" 
     app.config['SESSION_COOKIE_SECURE'] = "Secure"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
