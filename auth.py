@@ -5,7 +5,8 @@ from flask_login import login_user, login_required, current_user, logout_user
 from werkzeug.utils import secure_filename
 
 from webservice import db
-from webservice.schemes import user_schema, projects_schema, projects_read_schema, project_read_schema
+from webservice.gee import get_statistic
+from webservice.schemes import user_schema, projects_schema, projects_read_schema, project_read_schema, query_schema
 from webservice.models import Users, Projects, UsersProjects
 
 from werkzeug.security import check_password_hash
@@ -13,7 +14,8 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 import geopandas as gpd
-
+import base64
+import time
 
 auth = Blueprint('auth', __name__)
 
@@ -169,3 +171,27 @@ def convert():
         return geojson.to_json(), 200
     except Exception as e:
         return {'detail': 'failed to convert file'}, 400
+
+
+@auth.route('/api/query', methods=['POST'])
+@login_required
+def query():
+    data = query_schema.loads(request.data)
+
+    input_file = os.path.join(
+        current_app.config["UPLOAD_FOLDER"],
+        os.path.basename(data.url)
+    )
+
+    unique_name = base64.b64encode(
+        f'{input_file}-{time.time_ns()}'.encode()
+    ).decode()
+    output_file = f'{unique_name}.json'
+    output_path = os.path.join(current_app.config['UPLOAD_FOLDER'], output_file)
+
+    get_statistic(input_file, data.indicator, data.start_date, data.end_date, output_path)
+    output_file_url = url_for('auth.download_file', name=output_file)
+
+    return {
+        'url': output_file_url
+    }, 200

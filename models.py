@@ -36,6 +36,7 @@ class Projects(db.Model):
     geo_data_file = db.Column(URLType)
     users_projects = db.relationship('UsersProjects', backref="project", cascade='all,delete')
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id'))
+    report_url = db.Column(URLType)
 
 
 class Indicators(db.Model):
