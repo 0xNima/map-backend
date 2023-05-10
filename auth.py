@@ -61,13 +61,13 @@ def check():
     return jsonify({}), 200
 
 
-@auth.route('/uploads/<name>')
+@auth.route('/uploads/<name>/')
 @login_required
 def download_file(name):
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], name)
 
 
-@auth.route('/project', methods=['POST'])
+@auth.route('/project/', methods=['POST'])
 @login_required
 def new_project():
     data = {}
@@ -116,7 +116,7 @@ def new_project():
     return {'id': project.id}, 201
 
 
-@auth.route('/api/projects', methods=['GET'])
+@auth.route('/api/projects/', methods=['GET'])
 @login_required
 def fetch_projects():
     projects = db.session.query(Projects).join(UsersProjects).filter(UsersProjects.user_id == current_user.id)
@@ -124,7 +124,7 @@ def fetch_projects():
     return projects_read_schema.jsonify(projects), 200
 
 
-@auth.route('/api/projects/<project_id>', methods=['GET'])
+@auth.route('/api/projects/<project_id>/', methods=['GET'])
 @login_required
 def fetch_project(project_id):
     project = db.session.query(Projects).join(UsersProjects) \
@@ -134,7 +134,7 @@ def fetch_project(project_id):
     return project_read_schema.jsonify(project), 200
 
 
-@auth.route('/api/projects/<project_id>', methods=['DELETE'])
+@auth.route('/api/projects/<project_id>/', methods=['DELETE'])
 @login_required
 def delete_project(project_id):
     project = db.session.query(Projects).join(UsersProjects) \
@@ -149,7 +149,7 @@ def delete_project(project_id):
     return {}, code
 
 
-@auth.route('/convert', methods=['POST'])
+@auth.route('/convert/', methods=['POST'])
 @login_required
 def convert():
     remote = request.args.get('remote', 0)
@@ -174,7 +174,7 @@ def convert():
         return {'detail': 'failed to convert file'}, 400
 
 
-@auth.route('/api/query', methods=['POST'])
+@auth.route('/api/query/', methods=['POST'])
 @login_required
 def query():
     data = query_schema.loads(request.data)
