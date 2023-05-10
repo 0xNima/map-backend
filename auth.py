@@ -143,7 +143,7 @@ def delete_project(project_id):
     #    .filter(UsersProjects.user_id == 1, UsersProjects.project_id == project_id).first()
     code = 403
     if project:
-        Projects.query.filter_by(id=project_id).delete()
+        db.session.delete(project)
         db.session.commit()
         code = 200
     return {}, code
