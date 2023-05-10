@@ -8,6 +8,7 @@ from webservice import db
 from webservice.gee import get_statistic
 from webservice.schemes import user_schema, projects_schema, projects_read_schema, project_read_schema, query_schema
 from webservice.models import Users, Projects, UsersProjects
+from webservice.local import PLACEHOLDER_IMAGE
 
 from werkzeug.security import check_password_hash
 
@@ -96,7 +97,7 @@ def new_project():
             file_obj.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
             data[field] = url_for('auth.download_file', name=filename)
         else:
-            data[field] = url_for('auth.download_file', name='photo_2022-12-19_11-55-00.jpg')
+            data[field] = url_for('auth.download_file', name=PLACEHOLDER_IMAGE)
 
     users = data.pop('users', [])
     data = projects_schema.loads(
@@ -186,7 +187,7 @@ def query():
     unique_name = base64.b64encode(
         f'{input_file}-{time.time_ns()}'.encode()
     ).decode()
-    output_file = f'{unique_name}.json'
+    output_file = f'{unique_name}.geojson'
     output_path = os.path.join(current_app.config['UPLOAD_FOLDER'], output_file)
 
     get_statistic(input_file, data.indicator, data.start_date, data.end_date, output_path)
