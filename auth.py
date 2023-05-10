@@ -61,7 +61,7 @@ def check():
     return jsonify({}), 200
 
 
-@auth.route('/uploads/<name>/')
+@auth.route('/uploads/<name>')
 @login_required
 def download_file(name):
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], name)
