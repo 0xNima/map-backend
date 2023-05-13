@@ -37,7 +37,7 @@ def fetch_geodata():
 
             for file in files:
                 data.update({
-                    os.path.splitext(file)[0]: url_for('static', filename=f'{country}/{file}')
+                    os.path.splitext(file)[0]: url_for('statics', filename=f'{country}/{file}')
                 })
 
             return jsonify(data), 200
