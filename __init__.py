@@ -66,7 +66,7 @@ def create_app():
 
     @click.command(name='add_indicator')
     @click.option('--name')
-    @click.option('--type')
+    @click.option('--indicator_type')
     @with_appcontext
     def add_indicator(**arguments):
         indicator = Indicators(**arguments)
