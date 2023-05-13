@@ -24,7 +24,7 @@ def fetch_countries():
     return countries_schema.jsonify(countries), 200
 
 
-@main.route('/api/geo-data/', methods=['POST'])
+@main.route('/api/geodata/', methods=['POST'])
 def fetch_geodata():
     try:
         country = request.json.get('country')
