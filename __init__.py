@@ -19,7 +19,7 @@ lm = LoginManager()
 
 
 def create_app():
-    app = Flask(__name__, static_url_path='/static', static_folder='static')
+    app = Flask(__name__, static_url_path='/statics', static_folder='statics')
 
     app.config['SECRET_KEY'] = SECRET_KEY
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_URI
