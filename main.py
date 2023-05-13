@@ -8,7 +8,7 @@ import os
 main = Blueprint('main', __name__)
 
 STATIC_DIR = os.path.join(
-    os.path.dirname(__file__), 'static'
+    os.path.dirname(__file__), 'statics'
 )
 
 
