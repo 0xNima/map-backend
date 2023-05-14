@@ -13,6 +13,11 @@ INDICATORS_EE_MAP = {
     1: ''   # BIOMASS
 }
 
+METRIC = {
+    0: 'NDVI',
+    1: ''
+}
+
 
 def get_statistic(geo_file, indicator, start, end, output):
     gdf = gpd.read_file(geo_file)
@@ -28,6 +33,6 @@ def get_statistic(geo_file, indicator, start, end, output):
         feature_collection = geemap.geopandas_to_ee(gdf)
 
     image = ee.ImageCollection(INDICATORS_EE_MAP[indicator]) \
-        .filterDate(start, end).select('NDVI').mean()
+        .filterDate(start, end).select(METRIC[0]).mean()
 
     geemap.zonal_statistics(image, feature_collection, output, statistics_type='MEAN', scale=500, crs=str(gdf.crs))
