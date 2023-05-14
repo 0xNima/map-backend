@@ -1,19 +1,15 @@
-import os
 import ee
 import geemap
-import numpy as np
-import pandas as pd
 import geopandas as gpd
-import json
 
+from webservice.local import SERVICE_ACCOUNT_EMAIL, SERVICE_ACCOUNT_PATH
 
-# service_account = 'my-service-account@...gserviceaccount.com'
-# credentials = ee.ServiceAccountCredentials(service_account, '.private-key.json')
-# ee.Initialize(credentials)
-# ee.Authenticate()
+credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT_EMAIL, SERVICE_ACCOUNT_PATH)
+ee.Initialize(credentials)
+
 
 INDICATORS_EE_MAP = {
-    0: 'NOAA/VIIRS/DNB/MONTHLY_V1/VCMCFG',  # NDVI
+    0: 'MODIS/MOD09GA_006_NDVI',
     1: ''   # BIOMASS
 }
 
@@ -31,7 +27,7 @@ def get_statistic(geo_file, indicator, start, end, output):
                     break
         feature_collection = geemap.geopandas_to_ee(gdf)
 
-    image = ee.ImageCollection(INDICATORS_EE_MAP[indicator])\
-        .filterDate(start, end).select('avg_rad').mean()
+    image = ee.ImageCollection(INDICATORS_EE_MAP[indicator]) \
+        .filterDate(start, end).select('NDVI').mean()
 
-    geemap.zonal_statistics(image, feature_collection, output, statistics_type='MEAN', scale=500)
+    geemap.zonal_statistics(image, feature_collection, output, statistics_type='MEAN', scale=500, crs=str(gdf.crs))
