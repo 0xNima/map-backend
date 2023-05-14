@@ -22,25 +22,3 @@ def indicator():
 def fetch_countries():
     countries = Countries.query.all()
     return countries_schema.jsonify(countries), 200
-
-
-@main.route('/api/geodata/', methods=['POST'])
-def fetch_geodata():
-    try:
-        country = request.json.get('country')
-        if country:
-            data = {}
-            files = filter(
-                lambda file: os.path.splitext(file)[-1] == '.geojson',
-                os.listdir(os.path.join(STATIC_DIR, country))
-            )
-
-            for file in files:
-                data.update({
-                    os.path.splitext(file)[0]: url_for('static', filename=f'{country}/{file}')
-                })
-
-            return jsonify(data), 200
-        return jsonify({'detail': 'Bad Data'}), 400
-    except FileNotFoundError:
-        return jsonify({'detail': 'Country not found'}), 404
