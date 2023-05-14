@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_login import LoginManager
 from flask_cors import CORS
+from flask_migrate import Migrate
 
 from werkzeug.security import generate_password_hash
 
@@ -34,12 +35,15 @@ def create_app():
     db.init_app(app)
     ma.init_app(app)
     lm.init_app(app)
-   
+
+    migrate = Migrate(app, db)
+
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     with app.app_context():
-        from .models import Users, Indicators, Countries, Projects, UsersProjects
-        db.create_all()
+        # from .models import Users, Indicators, Countries, Projects, UsersProjects
+        # db.create_all()
+        from .models import Users
 
         @lm.user_loader
         def load_user(user_id):
