@@ -48,7 +48,6 @@ def login():
 @login_required
 def logout():
     db.session.query(Users).filter(Users.id == current_user.id).update({'logged_out': True})
-    #db.session.query(Users).filter(Users.id == 1).update({'logged_out': True})
     res = logout_user()
     if res:
         return jsonify({'detail': 'Logged out'}), 200
@@ -120,7 +119,6 @@ def new_project():
 @login_required
 def fetch_projects():
     projects = db.session.query(Projects).join(UsersProjects).filter(UsersProjects.user_id == current_user.id)
-    #projects = db.session.query(Projects).join(UsersProjects).filter(UsersProjects.user_id == 1)
     return projects_read_schema.jsonify(projects), 200
 
 
@@ -129,8 +127,6 @@ def fetch_projects():
 def fetch_project(project_id):
     project = db.session.query(Projects).join(UsersProjects) \
          .filter(UsersProjects.user_id == current_user.id, UsersProjects.project_id == project_id).first()
-    #project = db.session.query(Projects).join(UsersProjects) \
-    #    .filter(UsersProjects.user_id == 1, UsersProjects.project_id == project_id).first()
     return project_read_schema.jsonify(project), 200
 
 
@@ -139,8 +135,6 @@ def fetch_project(project_id):
 def delete_project(project_id):
     project = db.session.query(Projects).join(UsersProjects) \
          .filter(UsersProjects.user_id == current_user.id, UsersProjects.project_id == project_id).first()
-    #project = db.session.query(Projects).join(UsersProjects) \
-    #    .filter(UsersProjects.user_id == 1, UsersProjects.project_id == project_id).first()
     code = 403
     if project:
         db.session.delete(project)
