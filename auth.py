@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from webservice import db
 from webservice.gee import get_statistic
-from webservice.schemes import user_schema, projects_schema, projects_read_schema, project_read_schema, query_schema
+from webservice.schemes import user_schema, projects_schema, projects_read_schema, project_read_schema
 from webservice.models import Users, Projects, UsersProjects
 from webservice.local import PLACEHOLDER_IMAGE
 
@@ -17,6 +17,7 @@ from datetime import datetime
 import geopandas as gpd
 import base64
 import time
+import hashlib
 
 auth = Blueprint('auth', __name__)
 
@@ -74,7 +75,6 @@ def new_project():
     # (filed_name, alias_for_msg)
     required_fields = [
         ('name', 'name'),
-        ('geo_data_file', 'Geo Data File'),
     ]
 
     for k, v in request.form.items():
@@ -83,20 +83,23 @@ def new_project():
         else:
             data[k] = v
 
-    for field, file_obj in request.files.items():
-        data[field] = file_obj.filename
+    data['thumbnail'] = request.files.get('thumbnail')
 
     for field in required_fields:
         if not data.get(field[0]):
             return {"detail": f'{field[1]} is required'}, 400
 
-    for field, file_obj in request.files.items():
-        filename = secure_filename(file_obj.filename)
+    file = data['thumbnail']
+    if file:
+        filename = secure_filename(file.filename)
         if filename:
-            file_obj.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-            data[field] = url_for('auth.download_file', name=filename)
+            name, ext = os.path.splitext(filename)
+            name = hashlib.sha1(name.encode()).hexdigext()
+            filename = f'{name}{ext}'
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            data['thumbnail'] = url_for('auth.download_file', name=filename)
         else:
-            data[field] = url_for('auth.download_file', name=PLACEHOLDER_IMAGE)
+            data['thumbnail'] = url_for('auth.download_file', name=PLACEHOLDER_IMAGE)
 
     users = data.pop('users', [])
     data = projects_schema.loads(
@@ -168,24 +171,60 @@ def convert():
         return {'detail': 'failed to convert file'}, 400
 
 
-@auth.route('/api/query/', methods=['POST'])
+@auth.route('/query/', methods=['POST'])
 @login_required
 def query():
-    data = query_schema.loads(request.data)
+    data = {}
 
-    input_file = os.path.join(
-        current_app.config["UPLOAD_FOLDER"],
-        os.path.basename(data.url)
+    # (filed_name, alias_for_msg)
+    required_fields = [
+        ('geo_data_file', 'Geo Data File'),
+        ('start_date', 'Start Date'),
+        ('end_date', 'End Date'),
+        ('indicator', 'Indicator'),
+    ]
+
+    for k, v in request.form.items():
+        data[k] = v
+
+    data['geo_data_file'] = request.files.get('geo_data_file')
+
+    for field in required_fields:
+        if not data.get(field[0]):
+            return {"detail": f'{field[1]} is required'}, 400
+
+    file = data['geo_data_file']
+    name, ext = os.path.splitext(
+        secure_filename(file.filename)
     )
+    unique_input_filename = hashlib.sha1(name.encode()).hexdigext()
+    filename = f'{unique_input_filename}{ext}'
+    input_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
-    unique_name = base64.b64encode(
-        f'{input_file}-{time.time_ns()}'.encode()
-    ).decode()
-    output_file = f'{unique_name}.geojson'
-    output_path = os.path.join(current_app.config['UPLOAD_FOLDER'], output_file)
+    file.save(input_file_path)
 
-    get_statistic(input_file, data.indicator, data.start_date, data.end_date, output_path)
+    data['geo_data_file'] = url_for('auth.download_file', name=filename)
+
+    db.session.query(Projects).filter(Projects.id == data['pid']).update({
+        'query_start_date': data['query_start_date'],
+        'query_end_date': data['query_end_date'],
+        'query_indicator_id': data['query_indicator_id'],
+    })
+    db.session.commit()
+
+    unique_output_filename = f'{unique_input_filename}-{time.time_ns()}'
+    output_file = f'{unique_output_filename}.geojson'
+    output_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], output_file)
+
+    get_statistic(input_file_path, data['indicator'], data['start_date'], data['end_date'], output_file_path)
+
     output_file_url = url_for('auth.download_file', name=output_file)
+
+    db.session.query(Projects).filter(Projects.id == data['pid']).update({
+        'query_report_url': output_file_url,
+        'state': 1
+    })
+    db.session.commit()
 
     return {
         'url': output_file_url
