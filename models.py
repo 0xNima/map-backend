@@ -40,7 +40,7 @@ class Projects(db.Model):
     query_start_date = db.Column(db.DateTime)
     query_end_date = db.Column(db.DateTime)
     query_indicator_id = db.Column(db.Integer, db.ForeignKey('indicators.id'))
-    state = db.Column(db.Integer, default=0)    # -1: Failed, 0: Pending, 1: Done
+    state = db.Column(db.Integer, default=0)    # -1: Failed, 0: Initial, 1: Pending, 2: Done
 
 
 class Indicators(db.Model):
