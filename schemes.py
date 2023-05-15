@@ -28,19 +28,14 @@ class ProjectsSchema(ma.Schema):
 
 class ProjectsReadSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'geo_data_file', 'country_id',
-                  'query_report_url', 'query_start_date', 'query_end_date', 'query_indicator_id')
+        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'country_id', 'state')
 
 
 class ProjectReadSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'geo_data_file', 'country_id', 'report_url',
-                  'query_report_url', 'query_start_date', 'query_end_date', 'query_indicator_id')
-
-
-class QuerySchema(ma.Schema):
-    class Meta:
-        fields = ('indicator', 'url', 'start_date', 'end_date')
+        fields = ('id', 'name', 'description', 'created_at', 'thumbnail', 'geo_data_file', 'country_id',
+                  'query_report_url', 'query_start_date', 'query_end_date', 'query_indicator_id',
+                  'has_pending_query', 'state')
 
 
 countries_schema = CountriesSchema(many=True)
@@ -50,4 +45,3 @@ user_read_schema = UsersReadSchema()
 projects_schema = ProjectsSchema()
 projects_read_schema = ProjectsReadSchema(many=True)
 project_read_schema = ProjectReadSchema()
-query_schema = QuerySchema()
