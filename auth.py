@@ -90,7 +90,7 @@ def new_project():
             return {"detail": f'{field[1]} is required'}, 400
 
     file = data['thumbnail']
-    if file:
+    if file.filename:
         filename = secure_filename(file.filename)
         if filename:
             name, ext = os.path.splitext(filename)
@@ -98,9 +98,8 @@ def new_project():
             filename = f'{name}{ext}'
             file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
             data['thumbnail'] = url_for('auth.download_file', name=filename)
-        else:
-            data['thumbnail'] = url_for('auth.download_file', name=PLACEHOLDER_IMAGE)
-
+    else:
+        data['thumbnail'] = url_for('auth.download_file', name=PLACEHOLDER_IMAGE)
     users = data.pop('users', [])
     data = projects_schema.loads(
         projects_schema.dumps(data)
@@ -209,6 +208,7 @@ def query():
         'query_start_date': data['query_start_date'],
         'query_end_date': data['query_end_date'],
         'query_indicator_id': data['query_indicator_id'],
+        'state': 1  # go to pending state
     })
     db.session.commit()
 
